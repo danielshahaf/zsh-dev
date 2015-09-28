@@ -29,7 +29,7 @@ fi
 
 ## Argument parsing
 if [[ $# -ne 1 ]] ||
-   [[ $1 != (<30000->*|users/<->|unposted) ]] ||
+   [[ $1 != (<30000->*|users/<->|unposted*) ]] ||
    [[ $(git log -1 --pretty=%cn) != *"${AUTHOR_NAME}"* ]] ||
    false
 then
