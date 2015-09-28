@@ -24,7 +24,7 @@ prepend_to_file() {
 ## Update ChangeLog.
 rev=HEAD
 title="$(strftime "%Y-%m-%d" $EPOCHSECONDS)  $(git log --no-walk --pretty="%aN  <%aE>" $rev --)"
-files=( ${(f)$(git show --pretty=%n --name-only $rev --)} )
+files=( "${(@f)$(git diff --name-only "${rev}^..$rev" --)}" )
 summary=`git log --no-walk --pretty=%s $rev --`
 entry=''
 entry+=$title
