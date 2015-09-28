@@ -3,6 +3,7 @@ From: Daniel Shahaf <d.s@daniel.shahaf.name>
 To: Mikael Magnusson <mikachu@gmail.com>
 Cc: zsh-workers@zsh.org
 Subject: Re: helper script for making ChangeLog entries
+Message-ID: <20150417135307.GC2426@tarsus.local2>
 X-Seq: 34912
 
 Mikael Magnusson wrote on Wed, Dec 03, 2014 at 17:16:55 +0100:
