@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 
-local AUTHOR_NAME=$(git config --get user.name)
+local AUTHOR_NAME="$(git config --get user.name)"
 local UPSTREAM=origin/master
 local ENDPOINT
 export seqno
