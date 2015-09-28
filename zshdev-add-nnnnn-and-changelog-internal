@@ -1,0 +1,42 @@
+#!/usr/bin/env zsh
+
+# This is a helper script, invoked by zshdev-add-nnnnn-and-changelog.
+
+## Declarations
+local -i WIDTH=74 TAB_WIDTH=8
+local title seqno=$seqno files summary
+local logmsg
+local entry
+
+zmodload -F zsh/datetime b:strftime p:EPOCHSECONDS
+
+## Validate our caller.
+[[ $# -eq 0 && -n $seqno ]] || { echo "Usage error" >&2; exit 1 }
+
+## Helper functions.
+# Prepend the string $1 to the file $2.
+prepend_to_file() {
+  local prependum=$1
+  local file=$2
+  printf "0r %s\nw\nq\n" =(<<<$prependum) | ed -s -- $file
+}
+
+## Update ChangeLog.
+rev=HEAD
+title="$(strftime "%Y-%m-%d" $EPOCHSECONDS)  $(git log --no-walk --pretty="%aN  <%aE>" $rev --)"
+files=( ${(f)$(git show --pretty=%n --name-only $rev --)} )
+summary=`git log --no-walk --pretty=%s $rev --`
+entry=''
+entry+=$title
+entry+=$'\n\n'
+entry+=$(print -r - "* $seqno: ${(j:, :)files}: $summary" | fmt -w $((WIDTH - TAB_WIDTH)) | sed $'s/^/\t/g')
+entry+=$'\n\n'
+# Don't duplicate $title
+if [[ "$title" == "$(head -n1 < ChangeLog)" ]]; then
+  print -l '1,2d' 'w' 'q' | ed -s -- ChangeLog
+fi
+prepend_to_file $entry ChangeLog
+
+## Commit ChangeLog, amend the commit message.
+logmsg="$seqno: `git log --no-walk --pretty=%B HEAD`"
+git commit --amend -m "$logmsg" ChangeLog

@@ -1,0 +1,73 @@
+#!/usr/bin/env zsh
+
+local AUTHOR_NAME=$(git config --get user.name)
+local UPSTREAM=origin/master
+local ENDPOINT
+export seqno
+
+fail() { echo "$1" >&2; exit 1 }
+
+usage() {
+  cat >&2 <<EOF
+$0: a zsh developer's add-X-Seq-and-ChangeLog script
+
+Usage: $0 NUMBER
+
+Will prefix NUMBER to the log message of each local commit not yet
+in $UPSTREAM, and amend the commit with a ChangeLog entry.  The following
+formats are accepted for NUMBER: '42', 'users/42', 'unposted'.
+
+Prerequisite: git must have been compiled with PCRE support.
+EOF
+  exit ${1:-1}
+}
+
+## Require a recent zsh
+if [[ $( (){ shift -p; echo $# } arg1 arg2 arg3 ) -ne 2 ]]; then
+  fail "This script requires a zsh supporting 'shift -p'"
+fi
+
+## Argument parsing
+if [[ $# -ne 1 ]] ||
+   [[ $1 != (<30000->*|users/<->|unposted) ]] ||
+   [[ $(git log -1 --pretty=%cn) != *"${AUTHOR_NAME}"* ]] ||
+   false
+then
+  usage
+fi
+
+seqno=$1
+
+## Validate worktree state
+if [[ -n "`git status --porcelain ChangeLog`" ]]; then
+  fail "ChangeLog has local mods"
+fi
+
+if ! git merge-base --is-ancestor $UPSTREAM HEAD; then
+  fail "'$UPSTREAM' must be an ancestor of HEAD, but isn't"
+fi
+
+## Set ENDPOINT to oldest commit such that $ENDPOINT..HEAD consists of commits
+## by $AUTHOR_NAME that don't touch ChangeLog.
+
+# We can't just 'git log --not --committer=$AUTHOR_NAME', since the --not is silently ignored.
+# Hence we use --perl-regexp, even though it requires PCRE.
+[[ $AUTHOR_NAME == *'\'* ]] && fail "bobby tables"
+ENDPOINT=$(git log --perl-regexp --committer='^(?!\Q'$AUTHOR_NAME'\E)' -1 --pretty=%H)
+() { 
+  local arg
+  # Arguments are youngest-to-oldest, so:
+  while (( $# )); do
+    arg=$argv[-1]
+    if [[ $(git diff --name-only $arg^..$arg) != *ChangeLog* ]]; then
+      ENDPOINT=$argv[-1]
+      return
+    fi
+    shift -p
+  done
+} $(git rev-list $ENDPOINT..HEAD)
+
+## Main body
+seqno=$seqno \
+  GIT_EDITOR='true' git rebase -i $ENDPOINT^ --exec \
+    "$0-internal"
