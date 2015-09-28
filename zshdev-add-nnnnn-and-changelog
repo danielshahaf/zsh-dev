@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 
+## Global declarations
 local AUTHOR_NAME="$(git config --get user.name)"
 local UPSTREAM=origin/master
 local ENDPOINT
@@ -52,6 +53,8 @@ fi
 
 # We can't just 'git log --not --committer=$AUTHOR_NAME', since the --not is silently ignored.
 # Hence we use --perl-regexp, even though it requires PCRE.
+#
+# Checking for "doesn't contain backslash" is good enough since $AUTHOR_NAME is trusted.
 [[ $AUTHOR_NAME == *'\'* ]] && fail "bobby tables"
 ENDPOINT=$(git log --perl-regexp --committer='^(?!\Q'$AUTHOR_NAME'\E)' -1 --pretty=%H)
 () { 
