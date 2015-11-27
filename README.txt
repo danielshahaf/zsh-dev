@@ -32,3 +32,7 @@ Daniel
 P.S. I also use
         zstyle ':completion:*:-command-:*:commands' ignored-patterns zshdev-add-nnnnn-and-changelog-internal
 
+✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂✂
+
+Update (Nov 2015): I've now eliminated the manual "look up the X-Seq number"
+step by writing zshdev-am, which automates that step.

@@ -1,0 +1,2 @@
+#compdef zshdev-am
+_files -g "*.xseq|*.eml|<->"

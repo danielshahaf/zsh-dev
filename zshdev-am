@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+set -e
+
+# This script takes filenames of emails, extracts the X-Seq headers therefrom,
+# applies them with 'git am', and readies them for pushing by calling
+# zshdev-add-nnnnn-and-changelog.
+
+for arg; do
+  git am $arg
+  if xseq=$(<$arg sed -e '/^$/d' | sed -ne 's/^X-Seq: //p')
+     [[ -n $xseq ]] 
+  then
+    zshdev-add-nnnnn-and-changelog $xseq
+  else
+    echo >&2 "$0: failed to parse X-Seq from $arg"
+    exit 1
+    break
+  fi
+done
+tig "@{u}.." # review the results
