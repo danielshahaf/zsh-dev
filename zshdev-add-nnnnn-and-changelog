@@ -16,8 +16,9 @@ $NAME: a zsh developer's add-X-Seq-and-ChangeLog script
 Usage: $NAME NUMBER
 
 Will prefix NUMBER to the log message of each local commit not yet
-in $UPSTREAM, and amend the commit with a ChangeLog entry.  The following
-formats are accepted for NUMBER: '42', 'users/42', 'unposted'.
+in $UPSTREAM, and amend the commit with a ChangeLog entry.  NUMBER may
+be '42', 'users/42', 'unposted', or arbitrary text followed by an underscore
+(which will be stripped).
 
 Prerequisite: git must have been compiled with PCRE support.
 EOF
@@ -30,15 +31,21 @@ if [[ $( (){ shift -p; echo $# } arg1 arg2 arg3 ) -ne 2 ]]; then
 fi
 
 ## Argument parsing
-if [[ $# -ne 1 ]] ||
-   [[ $1 != (<30000->*|users/<->|unposted*) ]] ||
-   [[ $(git log -1 --pretty=%cn) != *"${AUTHOR_NAME}"* ]] ||
-   false
+if [[ $# -eq 1 ]] &&
+   [[ $(git log -1 --pretty=%cn) == *"${AUTHOR_NAME}"* ]] &&
+   true
 then
+  if [[ $1 == (<30000->*|users/<->|unposted*) ]]; then
+    seqno=$1
+  elif [[ $1 == *_ ]]; then
+    seqno=${1%?}
+  else
+    usage
+  fi
+else
   usage
 fi
-
-seqno=$1
+[[ -n $seqno ]] || usage
 
 ## Validate worktree state
 if [[ -n "`git status --porcelain ChangeLog`" ]]; then
