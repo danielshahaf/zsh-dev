@@ -4,15 +4,16 @@
 local AUTHOR_NAME="$(git config --get user.name)"
 local UPSTREAM=origin/master
 local ENDPOINT
+local NAME=$0
 export seqno
 
 fail() { echo "$1" >&2; exit 1 }
 
 usage() {
   cat >&2 <<EOF
-$0: a zsh developer's add-X-Seq-and-ChangeLog script
+$NAME: a zsh developer's add-X-Seq-and-ChangeLog script
 
-Usage: $0 NUMBER
+Usage: $NAME NUMBER
 
 Will prefix NUMBER to the log message of each local commit not yet
 in $UPSTREAM, and amend the commit with a ChangeLog entry.  The following
