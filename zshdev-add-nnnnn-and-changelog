@@ -54,8 +54,13 @@ fi
 # We can't just 'git log --not --committer=$AUTHOR_NAME', since the --not is silently ignored.
 # Hence we use --perl-regexp, even though it requires PCRE.
 #
-# Checking for "doesn't contain backslash" is good enough since $AUTHOR_NAME is trusted.
-[[ $AUTHOR_NAME == *'\'* ]] && fail "bobby tables"
+# Escaping of $AUTHOR_NAME: the value is trusted since it originates from ~/.gitconfig.  The
+# purpose of the check isn't to trap shell injections but to ensure the regexp will have the
+# intended meaning.  In straight Perl, we could escape arbitrary values of $AUTHOR_NAME by
+# doing «--committer='^(?!\Q$ENV{AUTHOR_NAME}\E)'», but PCRE doesn't support that construct,
+# so we simply bail out on values that would need to be escaped.  The character class used
+# is based on the list of metacharacters in perlreref(1).
+[[ $AUTHOR_NAME == *[\\.^\$*+?{}\(\)\[\]\|]* ]] && fail "\`git config --get user.name\` is not PCRE-safe; teach this script to escape it"
 ENDPOINT=$(git log --perl-regexp --committer='^(?!\Q'$AUTHOR_NAME'\E)' -1 --pretty=%H)
 () { 
   local arg
