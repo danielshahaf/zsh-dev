@@ -25,7 +25,17 @@ prepend_to_file() {
 rev=HEAD
 title="$(strftime "%Y-%m-%d" $EPOCHSECONDS)  $(git log --no-walk --pretty="%aN  <%aE>" $rev --)"
 files=( "${(@f)$(git diff --name-only "${rev}^..$rev" --)}" )
+if (( $#files <= 0 )); then
+  echo >&2 "$0: assertion failed: (\$#files > 0); \$#files is '$#files'"
+  exit 2
+fi
 summary=`git log --no-walk --pretty=%s $rev --`
+if (( $#files == 1 )) &&
+   { [[ $files[1] == ${summary%%: *} ]] || [[ ${files[1]##*/} == ${summary%%: *} ]] }; then
+  # Special case: if the commit touches one file, and the log message names that file
+  # explicitly or by basename, don't repeat the file name twice in ChangeLog.
+  summary=${summary#*: }
+fi
 entry=''
 entry+=$title
 entry+=$'\n\n'
