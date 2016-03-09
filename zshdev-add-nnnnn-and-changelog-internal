@@ -3,8 +3,9 @@
 # This is a helper script, invoked by zshdev-add-nnnnn-and-changelog.
 
 ## Declarations
-local -i WIDTH=74 TAB_WIDTH=8
-local title seqno=$seqno files summary
+readonly -i WIDTH=74 TAB_WIDTH=8
+readonly seqno=$seqno
+local title files summary
 local logmsg
 local entry
 
