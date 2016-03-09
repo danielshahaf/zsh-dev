@@ -24,7 +24,7 @@ prepend_to_file() {
 ## Update ChangeLog.
 rev=HEAD
 title="$(strftime "%Y-%m-%d" $EPOCHSECONDS)  $(git log --no-walk --pretty="%aN  <%aE>" $rev --)"
-files=( "${(@f)$(git diff --name-only "${rev}^..$rev" --)}" )
+files=( ${(0)"$(git diff -z --name-only "${rev}^..$rev" --)"} )
 if (( $#files <= 0 )); then
   echo >&2 "$0: assertion failed: (\$#files > 0); \$#files is '$#files'"
   exit 2
