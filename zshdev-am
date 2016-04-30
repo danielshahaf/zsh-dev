@@ -33,9 +33,9 @@ for arg; do
   if xseq=$(<$arg sed -n -e 's/^X-Seq: //p' -e '/^$/q' )
      [[ -n $xseq ]] 
   then
-    zshdev-add-nnnnn-and-changelog $xseq
+    zshdev-add-nnnnn-and-changelog $xseq || { echo >&2 "$0: child exited $?"; exit 2 }
   else
-    echo >&2 "$0: failed to parse X-Seq from $arg"
+    echo >&2 "$0: failed to parse X-Seq from ${(qq)arg}"
     exit 1
     break
   fi
