@@ -1,6 +1,9 @@
 #!/usr/bin/env zsh
 
-# This is a helper script, invoked by zshdev-add-nnnnn-and-changelog.
+# This is a helper script, invoked by zshdev-add-nnnnn-and-changelog through git
+# to amend the current HEAD commit.
+#
+# The caller sets the environment variable $seqno.
 
 ## Declarations
 readonly -i WIDTH=74 TAB_WIDTH=8
@@ -12,14 +15,14 @@ local entry
 zmodload -F zsh/datetime b:strftime p:EPOCHSECONDS
 
 ## Validate our caller.
-[[ $# -eq 0 && -n $seqno ]] || { echo "Usage error" >&2; exit 1 }
+[[ $# -eq 0 && -n $seqno ]] || { echo >&2 "$0: Usage error"; exit 2 }
 
 ## Helper functions.
 # Prepend the string $1 to the file $2.
 prepend_to_file() {
   local prependum=$1
   local file=$2
-  printf "0r %s\nw\nq\n" =(<<<$prependum) | ed -s -- $file
+  () { printf "0r %s\nw\nq\n" $1 | ed -s -- $file } =(<<<$prependum)
 }
 
 ## Update ChangeLog.
