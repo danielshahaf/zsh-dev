@@ -35,10 +35,10 @@ if [[ $# -eq 1 ]] &&
    [[ $(git log -1 --pretty=%cn) == *"${AUTHOR_NAME}"* ]] &&
    true
 then
-  if [[ $1 == (<30000->*|users/<->|unposted*) ]]; then
-    seqno=$1
-  elif [[ $1 == *_ ]]; then
+  if [[ $1 == *_ ]]; then
     seqno=${1%?}
+  elif [[ $1 == (<30000->*|users/<->|unposted*) ]]; then
+    seqno=$1
   else
     usage
   fi
