@@ -26,7 +26,8 @@ if [[ $1 == -* ]]; then
   usage
 fi
 
-for arg; do
+handle_arg() {
+  local arg=$1
   git am $arg
   if xseq=$(<$arg sed -n -e 's/^X-Seq: //p' -e '/^$/q' )
      [[ -n $xseq ]] 
@@ -40,5 +41,8 @@ for arg; do
     exit 1
     break
   fi
-done
+}
+
+for arg; do handle_arg "$arg"; done;
+
 tig "@{u}.." # review the results
