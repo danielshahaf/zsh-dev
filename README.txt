@@ -36,3 +36,7 @@ P.S. I also use
 
 Update (Nov 2015): I've now eliminated the manual "look up the X-Seq number"
 step by writing zshdev-am, which automates that step.
+
+Update (Sep 2016): Added support to zshdev-am for a "take an mbox on stdin"
+workflow, as produced by `git format-patch --stdout` and by Mutt after Tagging
+(selecting) several messages and Piping them to a command.
