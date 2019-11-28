@@ -17,8 +17,8 @@ Usage: $NAME NUMBER
 
 Will prefix NUMBER to the log message of each local commit not yet
 in $UPSTREAM, and amend the commit with a ChangeLog entry.  NUMBER may
-be '42', 'users/42', 'unposted', or arbitrary text followed by an underscore
-(which will be stripped).
+be '42', 'users/42', 'unposted', or 'foo_' (arbitrary text followed by an
+underscore, which will be stripped).
 
 Prerequisite: git must have been compiled with PCRE support.
 EOF
