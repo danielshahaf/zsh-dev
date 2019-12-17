@@ -53,7 +53,7 @@ if [[ -n "`git status --porcelain ChangeLog`" ]]; then
 fi
 
 if ! git merge-base --is-ancestor $UPSTREAM HEAD; then
-  fail "'$UPSTREAM' must be an ancestor of HEAD, but isn't"
+  fail "${(q-)UPSTREAM} must be an ancestor of HEAD, but isn't"
 fi
 
 ## Set ENDPOINT to oldest commit such that $ENDPOINT..HEAD consists of commits
