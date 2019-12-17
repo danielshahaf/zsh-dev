@@ -4,10 +4,10 @@
 readonly AUTHOR_NAME="$(git config --get user.name)"
 readonly UPSTREAM=origin/master
 local ENDPOINT
-readonly NAME=$0
+readonly NAME=$0:t
 export seqno
 
-fail() { echo "$1" >&2; exit 1 }
+fail() { echo "${NAME}: $1" >&2; exit 1 }
 
 usage() {
   cat >&2 <<EOF
