@@ -59,29 +59,31 @@ fi
 ## Set ENDPOINT to oldest commit such that $ENDPOINT..HEAD consists of commits
 ## by $AUTHOR_NAME that don't touch ChangeLog.
 
-# We can't just 'git log --not --committer=$AUTHOR_NAME', since the --not is silently ignored.
-# Hence we use --perl-regexp, even though it requires PCRE.
-#
-# Escaping of $AUTHOR_NAME: the value is trusted since it originates from ~/.gitconfig.  The
-# purpose of the check isn't to trap shell injections but to ensure the regexp will have the
-# intended meaning.  In straight Perl, we could escape arbitrary values of $AUTHOR_NAME by
-# doing «--committer='^(?!\Q$ENV{AUTHOR_NAME}\E)'», but PCRE doesn't support that construct,
-# so we simply bail out on values that would need to be escaped.  The character class used
-# is based on the list of metacharacters in perlreref(1).
-[[ $AUTHOR_NAME == *[\\.^\$*+?{}\(\)\[\]\|]* ]] && fail "\`git config --get user.name\` is not PCRE-safe; teach this script to escape it"
-ENDPOINT=$(git log --perl-regexp --committer='^(?!\Q'$AUTHOR_NAME'\E)' -1 --pretty=%H)
-() { 
-  local arg
-  # Arguments are youngest-to-oldest, so:
-  while (( $# )); do
-    arg=$argv[-1]
-    if [[ $(git diff --name-only $arg^..$arg) != *ChangeLog* ]]; then
-      ENDPOINT=$argv[-1]
-      return
-    fi
-    shift -p
+# Helper function. Validates that the commit $1 is to be operated on by this script.
+# If trouble, return non-zero and set $REPLY to an error message.
+commit_is_to_be_stamped() {
+  local -ar files_changed=( ${(0)"$(git diff --name-only -z "${1}^..${1}" --)"} ) 
+  if (( ${+files_changed[(r)ChangeLog]} )); then
+    REPLY="touches ChangeLog"
+    return 1
+  fi
+  if [[ $(git log -1 --pretty=%cn) != *"${AUTHOR_NAME}"* ]]; then
+    REPLY="not authored by ${(qq)AUTHOR_NAME}"
+    return 2
+  fi
+  if ! git merge-base --is-ancestor "$UPSTREAM" "$1"; then
+    REPLY="is not a descendant of ${(q-)UPSTREAM}"
+    return 3
+  fi
+  return 0
+}
+commit_is_to_be_stamped HEAD || fail "HEAD doesn't seem like it's a patch of mine ($REPLY)"
+() {
+  ENDPOINT=HEAD
+  while commit_is_to_be_stamped "${ENDPOINT}^"; do
+    ENDPOINT="${ENDPOINT}^"
   done
-} $(git rev-list $ENDPOINT..HEAD)
+}
 
 ## Main body
 seqno=$seqno \
