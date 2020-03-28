@@ -2,7 +2,6 @@
 
 ## Global declarations
 readonly AUTHOR_NAME="$(git config --get user.name)"
-readonly UPSTREAM=origin/master
 local ENDPOINT
 readonly NAME=$0:t
 export seqno
@@ -24,6 +23,18 @@ Prerequisite: git must have been compiled with PCRE support.
 EOF
   exit ${1:-1}
 }
+
+case $(git symbolic-ref HEAD) in
+	(refs/heads/master)
+		readonly UPSTREAM=origin/master
+		;;
+	(refs/heads/5.9)
+		readonly UPSTREAM=origin/5.9
+		;;
+	(*)
+		fail "Don't know what to set \$UPSTREAM to for the currently-checked-out branch"
+		;;
+esac
 
 ## Require a recent zsh
 if [[ $( (){ shift -p; echo $# } arg1 arg2 arg3 ) -ne 2 ]]; then
