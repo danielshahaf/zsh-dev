@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+if (( $# != 1 )) || [[ $1 == -* ]]; then
+	print -ru2 -- "$0: usage: $0 VALUE"
+	print -ru2 -- "$0:           … where VALUE is an X-Seq string"
+	print -ru2 -- "$0: will add \"X-Seq: VALUE\" to all files in the current working directory."
+	return 1
+fi
+
+for 1 in * ; do
+	print -rC1 -- '/^$/' '-' 'a' "X-Seq: 45583/${1%%-*}" '.' 'w' 'q' \
+		| ed -s $1 >/dev/null
+done
